@@ -50,7 +50,7 @@ class GameLogic:
         print("Player ", player, " hand: ")
         hand = ""
         for card in range(len(self.player_hands[player])):
-            hand + str(card) + ") " + self.player_hands[player][card]
+            hand = hand + str(card+1) + ") " + self.player_hands[player][card]
         print(hand)
 
     def game_is_over(self):
