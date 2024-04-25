@@ -1,11 +1,16 @@
-import sys
 import game_logic
-#import visualizer
+# import visualizer
 
 
-#running = true
-#while running:
-game_logic.init()
-game_logic.deal_cards()
+games = 1
+
+# for game in range(games):
+game_logic = game_logic.GameLogic()
 game_logic.print_hands()
-
+'''
+game_over = False
+while not game_over:
+    game_logic.play_turn()
+    game_over = game_logic.game_is_over()
+game_logic.end_game()
+'''
