@@ -7,6 +7,7 @@ class GameLogic:
         self.players_left = self.num_players
         self.player_hands = []
         self.players_lost = set()
+        self.players_alive = {i for i in range(1, self.num_players + 1)}
         self.players_kamermeisje = set()
         self.current_player = 1
         self.set_aside_card = 0
@@ -56,7 +57,9 @@ class GameLogic:
         print(hand)
 
     def game_is_over(self):
-        return (not len(self.deck) > 0) | self.num_players == 1
+        if self.players_left == 1:
+            return
+        return (not len(self.deck) > 0) | self.players_left == 1
 
     def end_game(self):
         print("Throwdown! End game")
@@ -66,6 +69,7 @@ class GameLogic:
 
     def player_lose(self, player):
         self.players_lost.add(player)
+        self.players_left -= 1
         print("Player ", player, " has lost and is out of the game.")
 
     def countess_forced(self):
