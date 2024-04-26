@@ -68,23 +68,36 @@ class GameLogic:
         self.players_lost.add(player)
         print("Player ", player, " has lost and is out of the game.")
 
+    def countess_forced(self):
+        cards = self.player_hands[self.current_player]
+        if 7 in cards:
+            if 5 in cards:
+                return True
+            if 6 in cards:
+                return True
+        return False
+
     def play_turn(self):
         print("\nPlayer ", str(self.current_player), "'s turn.")
         self.players_kamermeisje.discard(self.current_player)
         self.deal_card(self.current_player)
         self.print_hand(self.current_player)
         chosen_card = 0
-        card_chosen = False
-        while not card_chosen:
-            try:
-                chosen_card = int(input("Welke kaart wil je spelen? (1/2): "))
-                if chosen_card < 1 or chosen_card > 2:
-                    card_chosen = False
+        if self.countess_forced():
+            chosen_card = 1 if self.player_hands[self.current_player][0] == 7 else 2
+        else:
+            card_chosen = False
+            while not card_chosen:
+                try:
+                    chosen_card = int(input("Welke kaart wil je spelen? (1/2): "))
+                    if chosen_card < 1 or chosen_card > 2:
+                        card_chosen = False
+                        print("Please choose a valid option.\n")
+                    else:
+                        card_chosen = True
+                except ValueError:
                     print("Please choose a valid option.\n")
-                else:
-                    card_chosen = True
-            except ValueError:
-                print("Please choose a valid option.\n")
+
         self.play_card(int(chosen_card - 1))
         self.advance_turn()
 
@@ -105,11 +118,13 @@ class GameLogic:
                 self.play_kamermeisje()
             case "Prins":
                 self.play_prins()
+            case "Koning":
+                self.play_king()
 
     def play_princess(self):
         self.player_lose(self.current_player)
 
-    def player_kamermeisje(self, player):
+    def player_protected_kamermeisje(self, player):
         return player in self.players_kamermeisje
 
     def choose_target_player(self, prins=False):
@@ -119,7 +134,7 @@ class GameLogic:
             if (
                 not self.player_has_lost(player + 1)
                 and ((player + 1 != self.current_player) or prins)
-                and not self.player_kamermeisje(player + 1)
+                and not self.player_protected_kamermeisje(player + 1)
             ):
                 eligible_players.add(player + 1)
         print(eligible_players)
@@ -149,7 +164,14 @@ class GameLogic:
         self.player_hands[player].pop()
         self.deal_card(player)
 
+    def switch_hands(self, player):
+        target_card = self.get_player_card(player)
+        current_card = self.get_current_player_other_card()
+        self.player_hands[self.current_player][0] = target_card
+        self.player_hands[player][0] = current_card
+
     def play_guard(self):
+        print("A guard was played by Player ", self.current_player)
         target = self.choose_target_player()
         guessed_a_card = False
         while not guessed_a_card:
@@ -168,11 +190,13 @@ class GameLogic:
             self.player_lose(target)
 
     def play_priest(self):
+        print("A priest was played by Player ", self.current_player)
         target = self.choose_target_player()
         print("This is the hand of player ", target, ": ")
         self.print_hand(target)
 
     def play_baron(self):
+        print("A baron was played by Player ", self.current_player)
         target = self.choose_target_player()
         target_card = self.get_player_card(target)
         current_player_card = self.get_current_player_other_card()
@@ -184,9 +208,18 @@ class GameLogic:
             print("The showdown was a tie.")
 
     def play_kamermeisje(self):
+        print("A kamermeisje was played by Player ", self.current_player)
         self.players_kamermeisje.add(self.current_player)
 
     def play_prins(self):
+        print("A prince was played by Player ", self.current_player)
         target = self.choose_target_player(prins=True)
         self.discard_hand(target)
-    
+
+    def play_king(self):
+        print("A king was played by Player ", self.current_player)
+        target = self.choose_target_player()
+        self.switch_hands(target)
+
+    def play_countess(self):
+        print("A countess was played by Player ", self.current_player)
